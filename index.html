@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Connect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4361ee, #7209b7, #560bad);
+            padding: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 40px 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid #25d366;
+            overflow: hidden;
+            margin: 0 auto 12px;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .online {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #25d366;
+            margin-bottom: 50px;
+        }
+
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            background: #25d366;
+            border-radius: 50%;
+        }
+
+        .connecting {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #25d366;
+            margin-bottom: 16px;
+        }
+
+        .chat-icon {
+            font-size: 20px;
+            margin-top: 5px;
+        }
+
+        .click-text {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 50px;
+            background: #25d366;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: .9px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            text-decoration: none;
+        }
+
+        .whatsapp-btn:hover {
+            background: #1da851;
+            transform: scale(1.02);
+        }
+
+        .whatsapp-btn:active {
+            transform: scale(0.98);
+        }
+
+        .whatsapp-btn svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+
+            .card {
+                padding: 32px 20px;
+                border-radius: 20px;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            .online {
+                font-size: 15px;
+            }
+
+            .connecting {
+                font-size: 18px;
+            }
+
+            .click-text {
+                font-size: 14px;
+            }
+
+            .whatsapp-btn {
+                padding: 16px 24px;
+                font-size: 16px;
+            }
+
+            .whatsapp-btn svg {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .card {
+                padding: 28px 16px;
+            }
+
+            .connecting {
+                font-size: 16px;
+            }
+
+            .whatsapp-btn {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="avatar">
+            <img src="shocked.jpg" alt="Profile">
+        </div>
+
+        <p class="online">
+            <span class="online-dot"></span>
+            Online now
+        </p>
+
+        <div class="connecting">
+            <span class="chat-icon">💬</span>
+            Connecting to WhatsApp...
+        </div>
+
+        <p class="click-text">👇 CLICK BELOW TO CONTINUE 👇</p>
+
+        <a href="https://wa.me/" class="whatsapp-btn" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path fill="none" stroke="#fff" stroke-width="1.5" d="M12 2C6.486 2 2 6.486 2 12c0 2.103.646 4.074 1.759 5.717L2 22l4.383-1.697A9.95 9.95 0 0012 22c5.514 0 10-4.486 10-10S17.514 2 12 2z"/>
+                <path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.149-.672.15-.198.297-.768.967-.94 1.165-.173.198-.347.223-.644.075-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.607.134-.133.297-.347.446-.521.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.149-.672-1.612-.921-2.206-.242-.577-.487-.499-.672-.509l-.573-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.693.626.712.228 1.36.196 1.872.119.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.073-.126-.268-.198-.565-.347z"/>
+            </svg>
+            CHAT ON WHATSAPP
+        </a>
+    </div>
+</body>
+</html>
