@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countries Blocking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+        }
+
+        .logout-btn {
+            background: #ff4a4a;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #ff6b6b;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .nav-link {
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #4a9eff;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+        }
+
+        .block-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .block-form input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .block-form input:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .block-form button {
+            padding: 12px 25px;
+            background: #ff4a4a;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .block-form button:hover {
+            background: #ff6b6b;
+        }
+
+        .country-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .country-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .country-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .country-card .flag {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .country-card .name {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .country-card .code {
+            color: #4a9eff;
+            font-size: 12px;
+        }
+
+        .country-card .unblock-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4a4a;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .country-card .unblock-btn:hover {
+            background: #ff6b6b;
+        }
+
+        .blocked-count {
+            background: rgba(255, 74, 74, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .blocked-count .count {
+            font-size: 2em;
+            color: #ff4a4a;
+            font-weight: bold;
+        }
+
+        .blocked-count .label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .info-box {
+            background: rgba(74, 158, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4a9eff;
+        }
+
+        .info-box p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌍 Countries Blocking</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="nav-links">
+            <a href="/admin" class="nav-link">Dashboard</a>
+            <a href="/admin/analytics" class="nav-link">Analytics</a>
+            <a href="/admin/countries" class="nav-link active">Countries</a>
+            <a href="/admin/settings" class="nav-link">Settings</a>
+        </div>
+
+        <div class="blocked-count">
+            <div class="count" id="blockedCount">0</div>
+            <div class="label">Countries Blocked</div>
+        </div>
+
+        <div class="card">
+            <h2>Block New Country</h2>
+            <div class="block-form">
+                <input
+                    type="text"
+                    id="countryInput"
+                    placeholder="Enter country code (e.g., CN, US, IN)"
+                    maxlength="2"
+                >
+                <button onclick="blockCountry()">Block Country</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Search & Manage Countries</h2>
+            <div class="search-box">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search countries..."
+                    onkeyup="filterCountries()"
+                >
+            </div>
+            <div class="country-grid" id="countryGrid">
+                <p>Loading countries...</p>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <p>
+                <strong>ℹ️ How it works:</strong> When users from blocked countries try to access the admin panel,
+                they will receive a 403 Forbidden error. This helps you control access based on geographic location.
+                Common country codes include: US (United States), CN (China), RU (Russia), IN (India), etc.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let refreshInterval;
+
+        async function loadCountries() {
+            try {
+                const response = await fetch('/api/admin/countries');
+                const data = await response.json();
+
+                document.getElementById('blockedCount').textContent = data.blockedCountries.length;
+
+                // All countries for reference
+                const allCountries = [
+                    { code: 'US', name: 'United States' },
+                    { code: 'CN', name: 'China' },
+                    { code: 'IN', name: 'India' },
+                    { code: 'GB', name: 'United Kingdom' },
+                    { code: 'DE', name: 'Germany' },
+                    { code: 'FR', name: 'France' },
+                    { code: 'RU', name: 'Russia' },
+                    { code: 'BR', name: 'Brazil' },
+                    { code: 'CA', name: 'Canada' },
+                    { code: 'AU', name: 'Australia' },
+                    { code: 'JP', name: 'Japan' },
+                    { code: 'KR', name: 'South Korea' },
+                    { code: 'IT', name: 'Italy' },
+                    { code: 'ES', name: 'Spain' },
+                    { code: 'MX', name: 'Mexico' },
+                    { code: 'AR', name: 'Argentina' },
+                    { code: 'ID', name: 'Indonesia' },
+                    { code: 'NL', name: 'Netherlands' },
+                    { code: 'SA', name: 'Saudi Arabia' },
+                    { code: 'TR', name: 'Turkey' },
+                    { code: 'PL', name: 'Poland' },
+                    { code: 'UA', name: 'Ukraine' },
+                    { code: 'AE', name: 'United Arab Emirates' },
+                    { code: 'TH', name: 'Thailand' },
+                    { code: 'EG', name: 'Egypt' },
+                    { code: 'VN', name: 'Vietnam' },
+                    { code: 'NG', name: 'Nigeria' },
+                    { code: 'PH', name: 'Philippines' },
+                    { code: 'MY', name: 'Malaysia' },
+                    { code: 'CD', name: 'DR Congo' },
+                    { code: 'KE', name: 'Kenya' },
+                    { code: 'ZA', name: 'South Africa' },
+                    { code: 'MA', name: 'Morocco' },
+                    { code: 'GH', name: 'Ghana' },
+                    { code: 'ET', name: 'Ethiopia' },
+                    { code: 'AO', name: 'Angola' },
+                    { code: 'SD', name: 'Sudan' },
+                    { code: 'MZ', name: 'Mozambique' },
+                    { code: 'CM', name: 'Cameroon' },
+                    { code: 'MU', name: 'Mauritius' },
+                    { code: 'UG', name: 'Uganda' },
+                    { code: 'TN', name: 'Tunisia' },
+                    { code: 'NE', name: 'Niger' },
+                    { code: 'GN', name: 'Guinea' },
+                    { code: 'ZM', name: 'Zambia' },
+                    { code: 'IR', name: 'Iran' },
+                    { code: 'IQ', name: 'Iraq' },
+                    { code: 'SY', name: 'Syria' },
+                    { code: 'JO', name: 'Jordan' },
+                    { code: 'LB', name: 'Lebanon' },
+                    { code: 'KW', name: 'Kuwait' },
+                    { code: 'QA', name: 'Qatar' },
+                    { code: 'BH', name: 'Bahrain' },
+                    { code: 'OM', name: 'Oman' },
+                    { code: 'YE', name: 'Yemen' },
+                    { code: 'PK', name: 'Pakistan' },
+                    { code: 'BD', name: 'Bangladesh' },
+                    { code: 'LK', name: 'Sri Lanka' },
+                    { code: 'MM', name: 'Myanmar' },
+                    { code: 'NP', name: 'Nepal' },
+                    { code: 'BT', name: 'Bhutan' },
+                    { code: 'MV', name: 'Maldives' },
+                    { code: 'AF', name: 'Afghanistan' },
+                    { code: 'TJ', name: 'Tajikistan' },
+                    { code: 'KG', name: 'Kyrgyzstan' },
+                    { code: 'TM', name: 'Turkmenistan' },
+                    { code: 'UZ', name: 'Uzbekistan' },
+                    { code: 'AM', name: 'Armenia' },
+                    { code: 'AZ', name: 'Azerbaijan' },
+                    { code: 'GE', name: 'Georgia' },
+                    { code: 'KZ', name: 'Kazakhstan' },
+                    { code: 'MN', name: 'Mongolia' },
+                    { code: 'KP', name: 'North Korea' },
+                    { code: 'KR', name: 'South Korea' },
+                    { code: 'MN', name: 'Mongolia' },
+                    { code: 'SG', name: 'Singapore' },
+                    { code: 'HK', name: 'Hong Kong' },
+                    { code: 'TW', name: 'Taiwan' },
+                    { code: 'MO', name: 'Macau' },
+                    { code: 'FJ', name: 'Fiji' },
+                    { code: 'PG', name: 'Papua New Guinea' },
+                    { code: 'SB', name: 'Solomon Islands' },
+                    { code: 'TO', name: 'Tonga' },
+                    { code: 'WS', name: 'Samoa' },
+                    { code: 'NZ', name: 'New Zealand' },
+                    { code: 'TL', name: 'East Timor' },
+                    { code: 'FM', name: 'Micronesia' },
+                    { code: 'PW', name: 'Palau' },
+                    { code: 'MP', name: 'Northern Mariana Islands' },
+                    { code: 'GU', name: 'Guam' },
+                    { code: 'PR', name: 'Puerto Rico' },
+                    { code: 'VI', name: 'US Virgin Islands' },
+                    { code: 'KY', name: 'Cayman Islands' },
+                    { code: 'BS', name: 'Bahamas' },
+                    { code: 'BM', name: 'Bermuda' },
+                    { code: 'AI', name: 'Anguilla' },
+                    { code: 'AG', name: 'Antigua and Barbuda' },
+                    { code: 'BB', name: 'Barbados' },
+                    { code: 'DM', name: 'Dominica' },
+                    { code: 'GD', name: 'Grenada' },
+                    { code: 'LC', name: 'Saint Lucia' },
+                    { code: 'VC', name: 'Saint Vincent and the Grenadines' },
+                    { code: 'KN', name: 'Saint Kitts and Nevis' },
+                    { code: 'TC', name: 'Turks and Caicos Islands' },
+                    { code: 'VG', name: 'British Virgin Islands' },
+                    { code: 'AI', name: 'Anguilla' },
+                    { code: 'AW', name: 'Aruba' },
+                    { code: 'CW', name: 'Curaçao' },
+                    { code: 'BQ', name: 'Bonaire' },
+                    { code: 'SX', name: 'Sint Maarten' },
+                    { code: 'MF', name: 'Saint Martin' },
+                    { code: 'GL', name: 'Greenland' },
+                    { code: 'IS', name: 'Iceland' },
+                    { code: 'FO', name: 'Faroe Islands' },
+                    { code: 'AX', name: 'Åland Islands' },
+                    { code: 'EE', name: 'Estonia' },
+                    { code: 'LV', name: 'Latvia' },
+                    { code: 'LT', name: 'Lithuania' },
+                    { code: 'FI', name: 'Finland' },
+                    { code: 'SE', name: 'Sweden' },
+                    { code: 'NO', name: 'Norway' },
+                    { code: 'DK', name: 'Denmark' },
+                    { code: 'CZ', name: 'Czech Republic' },
+                    { code: 'SK', name: 'Slovakia' },
+                    { code: 'HU', name: 'Hungary' },
+                    { code: 'AT', name: 'Austria' },
+                    { code: 'LI', name: 'Liechtenstein' },
+                    { code: 'CH', name: 'Switzerland' },
+                    { code: 'LI', name: 'Liechtenstein' },
+                    { code: 'IE', name: 'Ireland' },
+                    { code: 'PT', name: 'Portugal' },
+                    { code: 'ES', name: 'Spain' },
+                    { code: 'GR', name: 'Greece' },
+                    { code: 'CY', name: 'Cyprus' },
+                    { code: 'MT', name: 'Malta' },
+                    { code: 'AL', name: 'Albania' },
+                    { code: 'MK', name: 'North Macedonia' },
+                    { code: 'XK', name: 'Kosovo' },
+                    { code: 'RO', name: 'Romania' },
+                    { code: 'BG', name: 'Bulgaria' },
+                    { code: 'HR', name: 'Croatia' },
+                    { code: 'SI', name: 'Slovenia' },
+                    { code: 'BA', name: 'Bosnia and Herzegovina' },
+                    { code: 'ME', name: 'Montenegro' },
+                    { code: 'RS', name: 'Serbia' },
+                    { code: 'MD', name: 'Moldova' },
+                    { code: 'UA', name: 'Ukraine' },
+                    { code: 'BY', name: 'Belarus' },
+                    { code: 'LT', name: 'Lithuania' },
+                    { code: 'KG', name: 'Kyrgyzstan' },
+                    { code: 'TM', name: 'Turkmenistan' },
+                    { code: 'UZ', name: 'Uzbekistan' },
+                    { code: 'TJ', name: 'Tajikistan' },
+                    { code: 'KZ', name: 'Kazakhstan' },
+                    { code: 'AM', name: 'Armenia' },
+                    { code: 'AZ', name: 'Azerbaijan' },
+                    { code: 'GE', name: 'Georgia' },
+                    { code: 'GN', name: 'Guinea' },
+                    { code: 'GW', name: 'Guinea-Bissau' },
+                    { code: 'CV', name: 'Cabo Verde' },
+                    { code: 'ST', name: 'São Tomé and Príncipe' },
+                    { code: 'AO', name: 'Angola' },
+                    { code: 'CD', name: 'DR Congo' },
+                    { code: 'GQ', name: 'Equatorial Guinea' },
+                    { code: 'CG', name: 'Republic of the Congo' },
+                    { code: 'CM', name: 'Cameroon' },
+                    { code: 'GA', name: 'Gabon' },
+                    { code: 'BJ', name: 'Benin' },
+                    { code: 'TG', name: 'Togo' },
+                    { code: 'NE', name: 'Niger' },
+                    { code: 'TD', name: 'Chad' },
+                    { code: 'CF', name: 'Central African Republic' },
+                    { code: 'RW', name: 'Rwanda' },
+                    { code: 'BI', name: 'Burundi' },
+                    { code: 'TZ', name: 'Tanzania' },
+                    { code: 'UG', name: 'Uganda' },
+                    { code: 'KM', name: 'Comoros' },
+                    { code: 'MG', name: 'Madagascar' },
+                    { code: 'MW', name: 'Malawi' },
+                    { code: 'ZM', name: 'Zambia' },
+                    { code: 'ZW', name: 'Zimbabwe' },
+                    { code: 'NA', name: 'Namibia' },
+                    { code: 'BW', name: 'Botswana' },
+                    { code: 'LS', name: 'Lesotho' },
+                    { code: 'SZ', name: 'Eswatini' },
+                    { code: 'BJ', name: 'Benin' },
+                    { code: 'BF', name: 'Burkina Faso' },
+                    { code: 'ML', name: 'Mali' },
+                    { code: 'NE', name: 'Niger' },
+                    { code: 'SN', name: 'Senegal' },
+                    { code: 'CI', name: "Côte d'Ivoire" },
+                    { code: 'GH', name: 'Ghana' },
+                    { code: 'TG', name: 'Togo' },
+                    { code: 'GN', name: 'Guinea' },
+                    { code: 'GM', name: 'The Gambia' },
+                    { code: 'LR', name: 'Liberia' },
+                    { code: 'SL', name: 'Sierra Leone' },
+                    { code: 'MR', name: 'Mauritania' },
+                    { code: 'MV', name: 'Maldives' },
+                    { code: 'FJ', name: 'Fiji' },
+                    { code: 'NC', name: 'New Caledonia' },
+                    { code: 'PF', name: 'French Polynesia' },
+                    { code: 'CK', name: 'Cook Islands' },
+                    { code: 'WS', name: 'Samoa' },
+                    { code: 'TO', name: 'Tonga' },
+                    { code: 'TV', name: 'Tuvalu' },
+                    { code: 'NU', name: 'Niue' },
+                    { code: 'TK', name: 'Tokelau' },
+                    { code: 'PF', name: 'French Polynesia' },
+                    { code: 'MF', name: 'Saint Martin' },
+                    { code: 'BL', name: 'Saint Barthélemy' },
+                    { code: 'GP', name: 'Guadeloupe' },
+                    { code: 'MQ', name: 'Martinique' },
+                    { code: 'GF', name: 'French Guiana' },
+                    { code: 'RE', name: 'Réunion' },
+                    { code: 'YT', name: 'Mayotte' },
+                    { code: 'GF', name: 'French Guiana' },
+                    { code: 'PR', name: 'Puerto Rico' },
+                    { code: 'VI', name: 'US Virgin Islands' },
+                    { code: 'GU', name: 'Guam' },
+                    { code: 'MP', name: 'Northern Mariana Islands' },
+                    { code: 'AS', name: 'American Samoa' },
+                    { code: 'UM', name: 'US Minor Outlying Islands' },
+                    { code: 'CX', name: 'Christmas Island' },
+                    { code: 'CC', name: 'Cocos (Keeling) Islands' },
+                    { code: 'HM', name: 'Heard Island and McDonald Islands' },
+                    { code: 'BV', name: 'Bouvet Island' },
+                    { code: 'GS', name: 'South Georgia and the South Sandwich Islands' },
+                    { code: 'AQ', name: 'Antarctica' },
+                    { code: 'TF', name: 'French Southern Territories' },
+                    { code: 'SJ', name: 'Svalbard and Jan Mayen' },
+                    { code: 'AQ', name: 'Antarctica' },
+                    { code: 'IO', name: 'British Indian Ocean Territory' },
+                    { code: 'PN', name: 'Pitcairn Islands' },
+                    { code: 'TF', name: 'French Southern Territories' },
+                    { code: 'AQ', name: 'Antarctica' },
+                    { code: 'UM', name: 'US Minor Outlying Islands' },
+                    { code: 'AQ', name: 'Antarctica' }
+                ];
+
+                const blocked = new Set(data.blockedCountries);
+
+                const grid = document.getElementById('countryGrid');
+                grid.innerHTML = allCountries
+                    .filter(country => !blocked.has(country.code))
+                    .map(country => `
+                        <div class="country-card">
+                            <button class="unblock-btn" onclick="unblockCountry('${country.code}')">✕</button>
+                            <div class="flag">🏳️</div>
+                            <div class="name">${country.name}</div>
+                            <div class="code">${country.code}</div>
+                        </div>
+                    `).join('');
+            } catch (error) {
+                console.error('Error loading countries:', error);
+            }
+        }
+
+        async function blockCountry() {
+            const input = document.getElementById('countryInput');
+            const country = input.value.toUpperCase().trim();
+
+            if (!country || country.length !== 2) {
+                alert('Please enter a valid 2-letter country code (e.g., US, CN, IN)');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/countries/block', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ country })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    input.value = '';
+                    loadCountries();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('Error blocking country. Please try again.');
+            }
+        }
+
+        async function unblockCountry(country) {
+            if (!confirm(`Are you sure you want to unblock ${country}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/countries/unblock/${country}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    loadCountries();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('Error unblocking country. Please try again.');
+            }
+        }
+
+        function filterCountries() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.country-card');
+
+            cards.forEach(card => {
+                const name = card.querySelector('.name').textContent.toLowerCase();
+                const code = card.querySelector('.code').textContent.toLowerCase();
+                card.style.display = name.includes(search) || code.includes(search) ? 'block' : 'none';
+            });
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/admin/logout', { method: 'POST' });
+                window.location.href = '/admin';
+            } catch (error) {
+                window.location.href = '/admin';
+            }
+        }
+
+        loadCountries();
+        refreshInterval = setInterval(loadCountries, 5000);
+    </script>
+</body>
+</html>

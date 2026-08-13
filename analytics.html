@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+        }
+
+        .logout-btn {
+            background: #ff4a4a;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #ff6b6b;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .nav-link {
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #4a9eff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            color: #4a9eff;
+            font-weight: bold;
+        }
+
+        .stat-card .label {
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            height: 400px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 20px 0;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, #4a9eff 0%, #00d4ff 100%);
+            border-radius: 5px 5px 0 0;
+            transition: height 0.5s;
+            position: relative;
+            min-height: 5px;
+        }
+
+        .bar:hover::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .bar-label {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .chart-container.small .bar-label {
+            font-size: 8px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table th {
+            color: #4a9eff;
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .trend {
+            font-size: 12px;
+        }
+
+        .trend.up { color: #00ff88; }
+        .trend.down { color: #ff4a4a; }
+
+        .refresh-btn {
+            background: #4a9eff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn:hover {
+            background: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📈 Analytics</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="nav-links">
+            <a href="/admin" class="nav-link">Dashboard</a>
+            <a href="/admin/analytics" class="nav-link active">Analytics</a>
+            <a href="/admin/countries" class="nav-link">Countries</a>
+            <a href="/admin/settings" class="nav-link">Settings</a>
+        </div>
+
+        <button class="refresh-btn" onclick="loadAnalytics()">🔄 Refresh Data</button>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="value" id="totalMessages">0</div>
+                <div class="label">Total Messages</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="totalUsers">0</div>
+                <div class="label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="activeCountries">0</div>
+                <div class="label">Active Countries</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="uniqueIPs">0</div>
+                <div class="label">Unique IPs</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>👥 Users by Country</h2>
+            <div class="chart-container small" id="usersChart">
+                <p>Loading chart...</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💬 Messages by Country</h2>
+            <div class="chart-container small" id="messagesChart">
+                <p>Loading chart...</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 Detailed Analytics</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>Users</th>
+                        <th>Messages</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody id="detailedTable">
+                    <tr><td colspan="4">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>🌍 Top 20 Countries (Combined)</h2>
+            <div class="chart-container" id="topChart">
+                <p>Loading chart...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let refreshInterval;
+
+        async function loadAnalytics() {
+            try {
+                const overview = await fetch('/api/admin/analytics/overview').then(r => r.json());
+                const usersByCountry = await fetch('/api/admin/analytics/users').then(r => r.json());
+                const messagesByCountry = await fetch('/api/admin/analytics/messages').then(r => r.json());
+
+                document.getElementById('totalMessages').textContent = overview.totalMessages.toLocaleString();
+                document.getElementById('totalUsers').textContent = overview.totalUsers.toLocaleString();
+                document.getElementById('activeCountries').textContent = overview.activeCountries;
+
+                // Users chart
+                const usersChart = document.getElementById('usersChart');
+                const sortedUsers = usersByCountry.breakdown
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 20);
+
+                if (sortedUsers.length > 0) {
+                    const maxValue = Math.max(...sortedUsers.map(u => u.count));
+                    usersChart.innerHTML = sortedUsers.map(item => {
+                        const height = (item.count / maxValue) * 100;
+                        return `
+                            <div class="bar" style="height: ${height}%" data-value="${item.count}"></div>
+                            <div class="bar-label">${item.country}</div>
+                        `;
+                    }).join('');
+                }
+
+                // Messages chart
+                const messagesChart = document.getElementById('messagesChart');
+                const sortedMessages = messagesByCountry.breakdown
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 20);
+
+                if (sortedMessages.length > 0) {
+                    const maxValue = Math.max(...sortedMessages.map(m => m.count));
+                    messagesChart.innerHTML = sortedMessages.map(item => {
+                        const height = (item.count / maxValue) * 100;
+                        return `
+                            <div class="bar" style="height: ${height}%" data-value="${item.count}"></div>
+                            <div class="bar-label">${item.country}</div>
+                        `;
+                    }).join('');
+                }
+
+                // Detailed table
+                const detailedTable = document.getElementById('detailedTable');
+                const combined = {};
+                [...usersByCountry.breakdown, ...messagesByCountry.breakdown].forEach(item => {
+                    combined[item.country] = {
+                        users: item.count,
+                        messages: item.count
+                    };
+                });
+
+                const sorted = Object.entries(combined)
+                    .sort((a, b) => b[1].users - a[1].users)
+                    .slice(0, 50);
+
+                detailedTable.innerHTML = sorted.map(([country, data]) => `
+                    <tr>
+                        <td>${country}</td>
+                        <td>${data.users}</td>
+                        <td>${data.messages}</td>
+                        <td class="trend up">📈 Active</td>
+                    </tr>
+                `).join('');
+
+                // Top chart
+                const topChart = document.getElementById('topChart');
+                const topCombined = {};
+                [...usersByCountry.breakdown, ...messagesByCountry.breakdown].forEach(item => {
+                    topCombined[item.country] = (topCombined[item.country] || 0) + item.count;
+                });
+
+                const topSorted = Object.entries(topCombined)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 30);
+
+                if (topSorted.length > 0) {
+                    const maxValue = Math.max(...topSorted.map(t => t[1]));
+                    topChart.innerHTML = topSorted.map(([country, count]) => {
+                        const height = (count / maxValue) * 100;
+                        return `
+                            <div class="bar" style="height: ${height}%" data-value="${count}"></div>
+                            <div class="bar-label">${country}</div>
+                        `;
+                    }).join('');
+                }
+
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/admin/logout', { method: 'POST' });
+                window.location.href = '/admin';
+            } catch (error) {
+                window.location.href = '/admin';
+            }
+        }
+
+        loadAnalytics();
+        refreshInterval = setInterval(loadAnalytics, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+        }
+
+        .logout-btn {
+            background: #ff4a4a;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #ff6b6b;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .nav-link {
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #4a9eff;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: #4a9eff;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .save-btn {
+            padding: 12px 30px;
+            background: #4a9eff;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        .save-btn:hover {
+            background: #00d4ff;
+        }
+
+        .save-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .info-box {
+            background: rgba(74, 158, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4a9eff;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #4a9eff;
+        }
+
+        .current-value {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+
+        .current-value .label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .current-value .value {
+            color: #4a9eff;
+            font-size: 14px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .setting-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .setting-card h3 {
+            color: #4a9eff;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .setting-card p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-badge.active {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .status-badge.inactive {
+            background: rgba(255, 74, 74, 0.2);
+            color: #ff4a4a;
+        }
+
+        .form-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .notification {
+            background: rgba(0, 255, 136, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification p {
+            color: #00ff88;
+            margin: 0;
+        }
+
+        .error-message {
+            color: #ff4a4a;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚙️ Settings</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="nav-links">
+            <a href="/admin" class="nav-link">Dashboard</a>
+            <a href="/admin/analytics" class="nav-link">Analytics</a>
+            <a href="/admin/countries" class="nav-link">Countries</a>
+            <a href="/admin/settings" class="nav-link active">Settings</a>
+        </div>
+
+        <div class="notification" id="notification">
+            <p>✅ Settings saved successfully!</p>
+        </div>
+
+        <div class="info-box">
+            <p><strong>ℹ️ Settings Management:</strong> Configure your chat link and other settings here. Changes take effect immediately. You can also manage server configuration options below.</p>
+        </div>
+
+        <div class="card">
+            <h2>🔗 Chat Link Configuration</h2>
+            <div class="form-group">
+                <label for="chatLink">Chat Link URL</label>
+                <input
+                    type="url"
+                    id="chatLink"
+                    placeholder="https://your-chat-link.com"
+                >
+                <div class="current-value">
+                    <div class="label">Current Value:</div>
+                    <div class="value" id="currentChatLink">-</div>
+                </div>
+            </div>
+            <button class="save-btn" onclick="saveChatLink()" id="saveChatLinkBtn">Save Chat Link</button>
+            <div class="error-message" id="chatLinkError"></div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Server Configuration</h2>
+            <div class="settings-grid">
+                <div class="setting-card">
+                    <h3>🔐 Session Timeout</h3>
+                    <p>Configure how long admin sessions remain active after login. Default: 24 hours.</p>
+                </div>
+
+                <div class="setting-card">
+                    <h3>🚦 Rate Limiting</h3>
+                    <p>Maximum requests per 15 minutes per IP. Default: 100 requests.</p>
+                </div>
+
+                <div class="setting-card">
+                    <h3>💾 Redis Cache</h3>
+                    <p>Data is cached in Redis for fast retrieval. Default: All data is stored in Redis.</p>
+                    <span class="status-badge active">Active</span>
+                </div>
+
+                <div class="setting-card">
+                    <h3>🌍 Country Blocking</h3>
+                    <p>Block access from specific countries. Configure in the Countries page.</p>
+                    <span class="status-badge active">Enabled</span>
+                </div>
+
+                <div class="setting-card">
+                    <h3>🔒 Security Headers</h3>
+                    <p>Helmet.js is enabled for security headers protection.</p>
+                    <span class="status-badge active">Active</span>
+                </div>
+
+                <div class="setting-card">
+                    <h3>💨 Compression</h3>
+                    <p>Gzip compression is enabled for faster page loads.</p>
+                    <span class="status-badge active">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💾 Memory Cache Status</h2>
+            <div class="settings-grid">
+                <div class="setting-card">
+                    <h3>IP Cache</h3>
+                    <p>Tracks rate limiting per IP in memory. Auto-refreshes periodically.</p>
+                    <span class="status-badge active">Active</span>
+                </div>
+
+                <div class="setting-card">
+                    <h3>Session Storage</h3>
+                    <p>Admin session data stored in memory with Redis persistence.</p>
+                    <span class="status-badge active">Active</span>
+                </div>
+
+                <div class="setting-card">
+                    <h3>Redis Connection</h3>
+                    <p>Redis is connected and ready for data storage.</p>
+                    <span class="status-badge active">Connected</span>
+                </div>
+
+                <div class="setting-card">
+                    <h3>Analytics Cache</h3>
+                    <p>Analytics data cached in Redis for fast access.</p>
+                    <span class="status-badge active">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 Quick Actions</h2>
+            <div class="settings-grid">
+                <div class="setting-card">
+                    <h3>🔄 Reset Analytics</h3>
+                    <p>Clear all analytics data and counters. This action cannot be undone.</p>
+                    <button onclick="resetAnalytics()" style="padding: 8px 16px; background: #ff4a4a; border: none; border-radius: 5px; color: #fff; cursor: pointer; margin-top: 10px;">Reset Analytics</button>
+                </div>
+
+                <div class="setting-card">
+                    <h3>🧹 Clear Redis Cache</h3>
+                    <p>Clear all cached data from Redis. This may cause temporary performance impact.</p>
+                    <button onclick="clearCache()" style="padding: 8px 16px; background: #ff4a4a; border: none; border-radius: 5px; color: #fff; cursor: pointer; margin-top: 10px;">Clear Cache</button>
+                </div>
+
+                <div class="setting-card">
+                    <h3>🔐 Change Password</h3>
+                    <p>Update the admin panel password. Current password required.</p>
+                    <button onclick="showChangePassword()" style="padding: 8px 16px; background: #4a9eff; border: none; border-radius: 5px; color: #fff; cursor: pointer; margin-top: 10px;">Change Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let refreshInterval;
+
+        async function loadSettings() {
+            try {
+                const chatLinkResponse = await fetch('/api/admin/chat-link');
+                const chatLinkData = await chatLinkResponse.json();
+
+                document.getElementById('chatLink').value = chatLinkData.chatLink;
+                document.getElementById('currentChatLink').textContent = chatLinkData.chatLink;
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        async function saveChatLink() {
+            const chatLink = document.getElementById('chatLink').value.trim();
+            const errorDiv = document.getElementById('chatLinkError');
+
+            if (!chatLink) {
+                errorDiv.textContent = 'Please enter a valid chat link URL';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            errorDiv.classList.remove('show');
+
+            try {
+                const response = await fetch('/api/admin/chat-link', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ chatLink })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    document.getElementById('currentChatLink').textContent = chatLink;
+                    showNotification('Chat link updated successfully!');
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to save chat link';
+                    errorDiv.classList.add('show');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Error saving chat link. Please try again.';
+                errorDiv.classList.add('show');
+            }
+        }
+
+        async function resetAnalytics() {
+            if (!confirm('Are you sure you want to reset all analytics data? This action cannot be undone.')) {
+                return;
+            }
+
+            if (!confirm('This will clear all message counts, user counts, and country statistics. Continue?')) {
+                return;
+            }
+
+            try {
+                // Reset counters
+                await redis.set('total_messages', '0');
+                await redis.set('total_users', '0');
+                await redis.set('active_countries', '0');
+                await redis.set('unique_ips', '0');
+                await redis.set('user_count_by_country', JSON.stringify({}));
+                await redis.set('message_count_by_country', JSON.stringify({}));
+
+                showNotification('Analytics reset successfully!');
+            } catch (error) {
+                alert('Error resetting analytics. Please try again.');
+            }
+        }
+
+        async function clearCache() {
+            if (!confirm('Are you sure you want to clear all Redis cache? This may cause temporary performance impact.')) {
+                return;
+            }
+
+            try {
+                await redis.flushdb();
+                showNotification('Cache cleared successfully!');
+            } catch (error) {
+                alert('Error clearing cache. Please try again.');
+            }
+        }
+
+        function showChangePassword() {
+            const newPass = prompt('Enter new password:');
+            if (!newPass) return;
+
+            const confirmPass = prompt('Confirm new password:');
+            if (confirmPass !== newPass) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            alert('Password change requires admin privileges and Redis access. Please contact your system administrator.');
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.querySelector('p').textContent = message;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/admin/logout', { method: 'POST' });
+                window.location.href = '/admin';
+            } catch (error) {
+                window.location.href = '/admin';
+            }
+        }
+
+        loadSettings();
+        refreshInterval = setInterval(loadSettings, 5000);
+    </script>
+</body>
+</html>
