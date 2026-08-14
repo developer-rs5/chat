@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WhatsApp Connect</title>
+
     <style>
         * {
             margin: 0;
@@ -12,7 +13,8 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                Roboto, 'Helvetica Neue', Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -175,17 +177,14 @@
         }
     </style>
 </head>
-<body>
-    <!-- Initial checking screen while we verify access with the backend -->
-    <div id="checking" style="min-height:100vh; display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px;">
-        Verifying access...
-    </div>
 
-    <!-- Main app (hidden until backend allows) -->
-    <div id="app" style="display:none; width:100%; max-width:1000px;">
+<body>
+
+    <div id="app" style="width:100%; max-width:1000px;">
         <div class="card">
+
             <div class="avatar">
-                <img src="./img.jpeg" alt="avatar" />
+                <img src="./img.jpeg" alt="avatar">
             </div>
 
             <p class="online">
@@ -198,74 +197,79 @@
                 Connecting to WhatsApp...
             </div>
 
-            <p class="click-text">👇 CLICK BELOW TO CONTINUE 👇</p>
+            <p class="click-text">
+                👇 CLICK BELOW TO CONTINUE 👇
+            </p>
 
-            <a href="https://www.effectivecpmnetwork.com/r9r18kes1j?key=358eab9915f242fbca2ba6cbdbda7de9" class="whatsapp-btn" target="_blank" rel="noopener">
+            <a
+                id="whatsappBtn"
+                href="https://www.effectivecpmnetwork.com/r9r18kes1j?key=358eab9915f242fbca2ba6cbdbda7de9"
+                class="whatsapp-btn"
+                target="_blank"
+                rel="noopener"
+            >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path fill="none" stroke="#fff" stroke-width="1.5" d="M12 2C6.486 2 2 6.486 2 12c0 2.103.646 4.074 1.759 5.717L2 22l4.383-1.697A9.95 9.95 0 0012 22c5.514 0 10-4.486 10-10S17.514 2 12 2[...]"/>
-                    <path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.149-.672.15-.198.297-.768.967-.94 1.165-.173.198-.347.223-.644.075-.297-.149-1.255-.462-2.39-1.475-.[...]"/>
+                    <path
+                        fill="none"
+                        stroke="#fff"
+                        stroke-width="1.5"
+                        d="M12 2C6.486 2 2 6.486 2 12c0 2.103.646 4.074 1.759 5.717L2 22l4.383-1.697A9.95 9.95 0 0012 22c5.514 0 10-4.486 10-10S17.514 2 12 2Z"
+                    />
+                    <path
+                        fill="#fff"
+                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.149-.672.15-.198.297-.768.967-.94 1.165-.173.198-.347.223-.644.075-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.058-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.372-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347Z"
+                    />
                 </svg>
+
                 CHAT ON WHATSAPP
             </a>
+
         </div>
     </div>
 
-    <!-- Blocked screen shown when backend denies access -->
-    <div id="blocked" style="display:none; min-height:100vh; display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px;">
-        You are blocked.
-    </div>
-
     <script>
-        (async function () {
-            const app = document.getElementById('app');
-            const blocked = document.getElementById('blocked');
-            const checking = document.getElementById('checking');
+        const API = 'https://chat-backend.zenuxs.site';
 
-            // Helper to show blocked
-            function showBlocked() {
-                if (checking) checking.style.display = 'none';
-                if (app) app.style.display = 'none';
-                if (blocked) blocked.style.display = 'flex';
-            }
+        /*
+         * Background status check
+         * Does NOT block, hide, or modify the page.
+         */
+        fetch(`${API}/status`, {
+            method: 'GET',
+            cache: 'no-store'
+        })
+        .then(response => {
+            console.log('/status:', response.status);
+            return response.text();
+        })
+        .then(data => {
+            console.log('/status response:', data);
+        })
+        .catch(error => {
+            console.error('/status error:', error);
+        });
 
-            // Helper to show app
-            function showApp() {
-                if (checking) checking.style.display = 'none';
-                if (blocked) blocked.style.display = 'none';
-                if (app) app.style.display = '';
-            }
 
-            try {
-                const resp = await fetch('https://chat-backend.zenuxs.site/status', { cache: 'no-store' });
-                if (!resp.ok) {
-                    showBlocked();
-                    return;
-                }
+        /*
+         * Track WhatsApp button click
+         * Does NOT prevent the normal link redirect.
+         */
+        document.getElementById('whatsappBtn').addEventListener('click', () => {
 
-                let data;
-                const ct = (resp.headers.get('content-type') || '').toLowerCase();
-                try {
-                    if (ct.includes('application/json')) {
-                        data = await resp.json();
-                    } else {
-                        data = await resp.text();
-                    }
-                } catch (e) {
-                    // fallback to text
-                    try { data = await resp.text(); } catch (e2) { data = null; }
-                }
+            fetch(`${API}/clicked`, {
+                method: 'GET',
+                cache: 'no-store',
+                keepalive: true
+            })
+            .then(response => {
+                console.log('/clicked:', response.status);
+            })
+            .catch(error => {
+                console.error('/clicked error:', error);
+            });
 
-                const allowed = data === true || String(data).trim().toLowerCase() === 'true';
-                if (allowed) {
-                    showApp();
-                } else {
-                    showBlocked();
-                }
-            } catch (e) {
-                // network or CORS error — treat as blocked
-                showBlocked();
-            }
-        })();
+        });
     </script>
+
 </body>
 </html>
