@@ -555,10 +555,10 @@ app.post("/server/update", async (req, res) => {
 // Serve static files
 app.use(express.static("public"));
 
-// // Serve the main HTML file
-// app.get("/", (req, res) => {
-//   res.sendFile(path.join(__dirname, "index.html"));
-// });
+// Serve the main HTML file
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "login.html"));
+});
 
 
 app.get("/status", (req, res) => {
