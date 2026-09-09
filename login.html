@@ -1,149 +1,2202 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zenuxs · Cloudflare Security & DNS</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    body {
+      background: #0b0e14;
+      color: #e8edf5;
+      padding: 24px;
+      min-height: 100vh;
+    }
 
-        .login-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 400px;
-        }
+    .app-container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
 
-        .login-container h1 {
-            color: #fff;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2em;
-        }
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+    .auth-card {
+      background: #1a1f2b;
+      border-radius: 32px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid #2f3748;
+    }
 
-        .form-group label {
-            display: block;
-            color: #fff;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
+    .auth-card h2 {
+      font-weight: 600;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
 
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-size: 16px;
-        }
+    .auth-card h2 i {
+      color: #5b7cfa;
+    }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: #4a9eff;
-        }
+    .auth-card p {
+      color: #9aa4bf;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
 
-        .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
+    .auth-card label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #bcc6df;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #4a9eff 0%, #00d4ff 100%);
-            color: #fff;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+    .auth-card label .required {
+      color: #f87171;
+      margin-left: 4px;
+    }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(74, 158, 255, 0.4);
-        }
+    .auth-card input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1px solid #2e364a;
+      background: #11161f;
+      color: #f0f4ff;
+      font-size: 0.95rem;
+      transition: 0.2s;
+    }
 
-        .error-message {
-            color: #ff4a4a;
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-            min-height: 20px;
-        }
-    </style>
+    .auth-card input:focus {
+      border-color: #5b7cfa;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(91, 124, 250, 0.2);
+    }
+
+    .auth-card input::placeholder {
+      color: #4a5268;
+    }
+
+    .auth-card .help-text {
+      font-size: 0.75rem;
+      color: #6a7694;
+      margin-top: 4px;
+    }
+
+    .auth-card .btn-primary {
+      width: 100%;
+      margin-top: 28px;
+      padding: 14px;
+      background: #5b7cfa;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .auth-card .btn-primary:hover {
+      background: #4a6ae0;
+      transform: scale(1.01);
+    }
+
+    .auth-card .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-card .error-msg {
+      color: #f87171;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .auth-card .success-msg {
+      color: #4ade80;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .auth-divider {
+      border: none;
+      border-top: 1px solid #2a3247;
+      margin: 20px 0;
+    }
+
+    .auth-section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #6a7694;
+      margin-bottom: 4px;
+    }
+
+    .main-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand i {
+      font-size: 2rem;
+      color: #5b7cfa;
+    }
+
+    .brand h1 {
+      font-weight: 600;
+      font-size: 1.6rem;
+      letter-spacing: -0.3px;
+    }
+
+    .brand span {
+      background: #2a3247;
+      padding: 4px 14px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      color: #bcc6df;
+      margin-left: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-actions .btn-outline {
+      background: transparent;
+      border: 1px solid #37405a;
+      padding: 8px 18px;
+      border-radius: 30px;
+      color: #d3defa;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions .btn-outline:hover {
+      background: #1e2638;
+      border-color: #5b7cfa;
+    }
+
+    .header-actions .btn-primary {
+      background: #5b7cfa;
+      border: none;
+      padding: 8px 22px;
+      border-radius: 30px;
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+
+    .header-actions .btn-primary:hover {
+      background: #4a6ae0;
+    }
+
+    .server-badge {
+      background: #1f273b;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      border: 1px solid #2f3748;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .server-badge i {
+      color: #5b7cfa;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: #151c28;
+      padding: 18px 16px;
+      border-radius: 20px;
+      border: 1px solid #252e40;
+    }
+
+    .stat-card .stat-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9aa4bf;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .stat-card .stat-number {
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin: 8px 0 4px;
+    }
+
+    .stat-card .stat-sub {
+      font-size: 0.75rem;
+      color: #6f7c9a;
+    }
+
+    .stat-card .stat-sub i {
+      margin-right: 4px;
+    }
+
+    .stat-card .stat-sub .success {
+      color: #4ade80;
+    }
+
+    .stat-card .stat-sub .danger {
+      color: #f87171;
+    }
+
+    .stat-card .stat-sub .warning {
+      color: #fbbf24;
+    }
+
+    .stat-card .live-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #4ade80;
+      border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.6;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.6;
+      }
+    }
+
+    .section {
+      background: #151c28;
+      border-radius: 24px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      border: 1px solid #252e40;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .section-header h3 {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-header h3 i {
+      color: #5b7cfa;
+    }
+
+    .section-header .badge {
+      background: #1f273b;
+      padding: 4px 14px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 400;
+    }
+
+    .route-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .route-card {
+      background: #0f1621;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid #293141;
+    }
+
+    .route-card .route-path {
+      font-family: monospace;
+      background: #1a2332;
+      padding: 4px 12px;
+      border-radius: 30px;
+      display: inline-block;
+      font-size: 0.8rem;
+      color: #bcc6df;
+    }
+
+    .route-card .route-metrics {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0 6px;
+      font-size: 0.9rem;
+    }
+
+    .route-card .route-metrics span i {
+      margin-right: 4px;
+    }
+
+    .route-card .progress {
+      height: 6px;
+      background: #202a3b;
+      border-radius: 10px;
+      margin: 10px 0 4px;
+    }
+
+    .route-card .progress .fill {
+      height: 100%;
+      border-radius: 10px;
+      background: #4ade80;
+    }
+
+    .route-card .method-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .method-tag {
+      background: #1f273b;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .method-tag.get {
+      color: #60a5fa;
+    }
+
+    .method-tag.post {
+      color: #fbbf24;
+    }
+
+    .method-tag.put {
+      color: #f472b6;
+    }
+
+    .method-tag.delete {
+      color: #f87171;
+    }
+
+    .traffic-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 120px;
+      padding: 10px 0;
+      overflow-x: auto;
+    }
+
+    .bar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1 0 30px;
+    }
+
+    .bar {
+      width: 100%;
+      background: #4ade80;
+      border-radius: 6px 6px 0 0;
+      min-height: 4px;
+      transition: 0.2s;
+    }
+
+    .bar.failed {
+      background: #f87171;
+    }
+
+    .bar-label {
+      font-size: 0.55rem;
+      color: #6f7c9a;
+      margin-top: 6px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 8px 8px 0;
+      color: #9aa4bf;
+      font-weight: 500;
+      border-bottom: 1px solid #293141;
+    }
+
+    td {
+      padding: 10px 8px 10px 0;
+      border-bottom: 1px solid #1c2538;
+    }
+
+    .status-badge {
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-2 {
+      background: #1b3a2a;
+      color: #4ade80;
+    }
+
+    .status-3 {
+      background: #2a2a1a;
+      color: #fbbf24;
+    }
+
+    .status-4,
+    .status-5 {
+      background: #3a1a1a;
+      color: #f87171;
+    }
+
+    .method-badge {
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: #1f273b;
+    }
+
+    .method-badge.get {
+      color: #60a5fa;
+    }
+
+    .method-badge.post {
+      color: #fbbf24;
+    }
+
+    .method-badge.put {
+      color: #f472b6;
+    }
+
+    .method-badge.delete {
+      color: #f87171;
+    }
+
+    .country-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 0;
+    }
+
+    .country-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: #1f273b;
+      border-radius: 10px;
+    }
+
+    .country-bar-fill {
+      height: 100%;
+      background: #5b7cfa;
+      border-radius: 10px;
+    }
+
+    .country-name {
+      min-width: 100px;
+    }
+
+    .country-count {
+      font-weight: 500;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .rule-card {
+      background: #0f1621;
+      border-radius: 16px;
+      padding: 14px 16px;
+      border: 1px solid #293141;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .rule-card .rule-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .rule-card .rule-type {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: #7e8bb0;
+      letter-spacing: 0.5px;
+    }
+
+    .rule-card .rule-value {
+      font-weight: 500;
+    }
+
+    .rule-card .rule-reason {
+      font-size: 0.75rem;
+      color: #7e8bb0;
+    }
+
+    .rule-card .rule-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .rule-card .rule-actions button {
+      background: transparent;
+      border: none;
+      color: #6f7c9a;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.2s;
+    }
+
+    .rule-card .rule-actions button:hover {
+      color: #f87171;
+    }
+
+    .empty-state {
+      padding: 30px 0;
+      text-align: center;
+      color: #6f7c9a;
+    }
+
+    .empty-state i {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-box {
+      background: #1a1f2b;
+      padding: 28px 32px;
+      border-radius: 28px;
+      max-width: 480px;
+      width: 100%;
+      border: 1px solid #2f3748;
+    }
+
+    .modal-box h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .modal-box label {
+      display: block;
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: #bcc6df;
+    }
+
+    .modal-box select,
+    .modal-box input,
+    .modal-box textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: #0f1621;
+      border: 1px solid #2e364a;
+      color: #f0f4ff;
+      margin-top: 4px;
+    }
+
+    .modal-box textarea {
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .modal-actions button {
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+    }
+
+    .modal-actions .btn-secondary {
+      background: #1f273b;
+      color: #d3defa;
+    }
+
+    .modal-actions .btn-danger {
+      background: #5b7cfa;
+      color: white;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #7e8bb0;
+    }
+
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .text-muted {
+      color: #7e8bb0;
+      font-size: 0.85rem;
+    }
+
+    .mt-2 {
+      margin-top: 12px;
+    }
+
+    .mb-1 {
+      margin-bottom: 6px;
+    }
+
+    .gap-2 {
+      gap: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .d-flex {
+      display: flex;
+      align-items: center;
+    }
+
+    .ip-link {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    .ip-link:hover {
+      text-decoration: underline;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      background: #0f1621;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid #293141;
+      margin-bottom: 20px;
+    }
+
+    .tab-nav button {
+      background: transparent;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      color: #7e8bb0;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: 500;
+    }
+
+    .tab-nav button.active {
+      background: #5b7cfa;
+      color: white;
+    }
+
+    .tab-nav button:hover:not(.active) {
+      background: #1e2638;
+      color: #d3defa;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .domain-card {
+      background: #0f1621;
+      border-radius: 16px;
+      padding: 16px 20px;
+      border: 1px solid #293141;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: 0.2s;
+    }
+
+    .domain-card:hover {
+      border-color: #5b7cfa;
+    }
+
+    .domain-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .domain-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .domain-details {
+      display: flex;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: #7e8bb0;
+    }
+
+    .domain-details span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .domain-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .domain-actions button {
+      background: transparent;
+      border: 1px solid #37405a;
+      padding: 6px 14px;
+      border-radius: 20px;
+      color: #d3defa;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.8rem;
+    }
+
+    .domain-actions button:hover {
+      background: #1e2638;
+      border-color: #5b7cfa;
+    }
+
+    .domain-actions .btn-danger {
+      border-color: #f87171;
+      color: #f87171;
+    }
+
+    .domain-actions .btn-danger:hover {
+      background: #3a1a1a;
+    }
+
+    .domain-status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .domain-status.protected {
+      background: #1a2a3a;
+      color: #60a5fa;
+    }
+
+    .domain-status.unprotected {
+      background: #3a1a1a;
+      color: #f87171;
+    }
+
+    .domains-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .domain-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .domain-form-row .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .domain-form label {
+      display: block;
+      font-size: 0.85rem;
+      color: #bcc6df;
+      margin-bottom: 4px;
+    }
+
+    .domain-form input,
+    .domain-form select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: #0b0e14;
+      border: 1px solid #2e364a;
+      color: #f0f4ff;
+      font-size: 0.9rem;
+    }
+
+    .domain-form input:focus,
+    .domain-form select:focus {
+      border-color: #5b7cfa;
+      outline: none;
+    }
+
+    .domain-form .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .domain-form .form-actions button {
+      padding: 10px 28px;
+      border-radius: 30px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .domain-form .form-actions .btn-primary {
+      background: #5b7cfa;
+      color: white;
+    }
+
+    .domain-form .form-actions .btn-secondary {
+      background: #1f273b;
+      color: #d3defa;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #5b7cfa;
+    }
+
+    .checkbox-group label {
+      margin-bottom: 0;
+    }
+
+    .quick-add-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .quick-add-row input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: #0b0e14;
+      border: 1px solid #2e364a;
+      color: #f0f4ff;
+    }
+
+    .quick-add-row button {
+      padding: 10px 28px;
+      border-radius: 30px;
+      border: none;
+      background: #5b7cfa;
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .quick-add-row button:hover {
+      background: #4a6ae0;
+    }
+
+    .rule-status {
+      font-size: 0.7rem;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .rule-status.active {
+      color: #4ade80;
+    }
+
+    .rule-status.inactive {
+      color: #f87171;
+    }
+
+    .suspicious-ip-item {
+      background: #0f1621;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid #293141;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .suspicious-ip-item span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .suspicious-ip-item .btn-outline {
+      background: transparent;
+      border: 1px solid #37405a;
+      padding: 4px 14px;
+      border-radius: 20px;
+      color: #d3defa;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.8rem;
+    }
+
+    .suspicious-ip-item .btn-outline:hover {
+      background: #3a1a1a;
+      border-color: #f87171;
+      color: #f87171;
+    }
+
+    @media (max-width: 768px) {
+      .domain-form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .domain-card {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .domain-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      }
+
+      .route-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .auth-card {
+        padding: 28px 20px;
+        margin: 16px;
+      }
+
+      .suspicious-ip-item {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="login-container">
-        <h1>🔒 Admin Login</h1>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter password"
-                    required
-                >
-            </div>
-            <button type="submit">Login</button>
-            <div class="error-message" id="errorMessage"></div>
-        </form>
-    </div>
+  <div id="app" class="app-container"></div>
+  <script>
+    // ---------- STATE ----------
+    const state = {
+      cfToken: localStorage.getItem('cfToken') || '',
+      zoneId: localStorage.getItem('zoneId') || '',
+      serverId: localStorage.getItem('serverId') || '',
+      zenuxsToken: localStorage.getItem('zenuxsToken') || '',
+      stats: null,
+      loading: true,
+      blockRules: [],
+      timeRange: '24h',
+      showModal: false,
+      newRule: { type: 'country', value: '', reason: '' },
+      authError: false,
+      authSuccess: false,
+      activeTab: 'analytics',
+      domains: [],
+      showDomainModal: false,
+      editingDomain: null,
+      newDomain: { name: '', type: 'A', content: '', proxied: true },
+      rulesetId: null,
+      isAuthenticated: false
+    };
 
-    <script>
-        const loginForm = document.getElementById('loginForm');
-        const passwordInput = document.getElementById('password');
-        const errorMessage = document.getElementById('errorMessage');
+    // Country codes mapping
+    const COUNTRY_CODES = {
+      'AF': 'Afghanistan', 'AL': 'Albania', 'DZ': 'Algeria', 'AD': 'Andorra', 'AO': 'Angola',
+      'AR': 'Argentina', 'AM': 'Armenia', 'AU': 'Australia', 'AT': 'Austria', 'AZ': 'Azerbaijan',
+      'BS': 'Bahamas', 'BH': 'Bahrain', 'BD': 'Bangladesh', 'BB': 'Barbados', 'BY': 'Belarus',
+      'BE': 'Belgium', 'BZ': 'Belize', 'BJ': 'Benin', 'BT': 'Bhutan', 'BO': 'Bolivia',
+      'BA': 'Bosnia and Herzegovina', 'BW': 'Botswana', 'BR': 'Brazil', 'BN': 'Brunei',
+      'BG': 'Bulgaria', 'BF': 'Burkina Faso', 'BI': 'Burundi', 'KH': 'Cambodia', 'CM': 'Cameroon',
+      'CA': 'Canada', 'CV': 'Cape Verde', 'CF': 'Central African Republic', 'TD': 'Chad',
+      'CL': 'Chile', 'CN': 'China', 'CO': 'Colombia', 'KM': 'Comoros', 'CG': 'Congo',
+      'CR': 'Costa Rica', 'HR': 'Croatia', 'CU': 'Cuba', 'CY': 'Cyprus', 'CZ': 'Czech Republic',
+      'DK': 'Denmark', 'DJ': 'Djibouti', 'DM': 'Dominica', 'DO': 'Dominican Republic',
+      'EC': 'Ecuador', 'EG': 'Egypt', 'SV': 'El Salvador', 'GQ': 'Equatorial Guinea',
+      'ER': 'Eritrea', 'EE': 'Estonia', 'ET': 'Ethiopia', 'FJ': 'Fiji', 'FI': 'Finland',
+      'FR': 'France', 'GA': 'Gabon', 'GM': 'Gambia', 'GE': 'Georgia', 'DE': 'Germany',
+      'GH': 'Ghana', 'GR': 'Greece', 'GD': 'Grenada', 'GT': 'Guatemala', 'GN': 'Guinea',
+      'GW': 'Guinea-Bissau', 'GY': 'Guyana', 'HT': 'Haiti', 'HN': 'Honduras', 'HU': 'Hungary',
+      'IS': 'Iceland', 'IN': 'India', 'ID': 'Indonesia', 'IR': 'Iran', 'IQ': 'Iraq',
+      'IE': 'Ireland', 'IL': 'Israel', 'IT': 'Italy', 'JM': 'Jamaica', 'JP': 'Japan',
+      'JO': 'Jordan', 'KZ': 'Kazakhstan', 'KE': 'Kenya', 'KI': 'Kiribati', 'KP': 'North Korea',
+      'KR': 'South Korea', 'KW': 'Kuwait', 'KG': 'Kyrgyzstan', 'LA': 'Laos', 'LV': 'Latvia',
+      'LB': 'Lebanon', 'LS': 'Lesotho', 'LR': 'Liberia', 'LY': 'Libya', 'LI': 'Liechtenstein',
+      'LT': 'Lithuania', 'LU': 'Luxembourg', 'MK': 'Macedonia', 'MG': 'Madagascar',
+      'MW': 'Malawi', 'MY': 'Malaysia', 'MV': 'Maldives', 'ML': 'Mali', 'MT': 'Malta',
+      'MH': 'Marshall Islands', 'MR': 'Mauritania', 'MU': 'Mauritius', 'MX': 'Mexico',
+      'FM': 'Micronesia', 'MD': 'Moldova', 'MC': 'Monaco', 'MN': 'Mongolia', 'ME': 'Montenegro',
+      'MA': 'Morocco', 'MZ': 'Mozambique', 'MM': 'Myanmar', 'NA': 'Namibia', 'NR': 'Nauru',
+      'NP': 'Nepal', 'NL': 'Netherlands', 'NZ': 'New Zealand', 'NI': 'Nicaragua', 'NE': 'Niger',
+      'NG': 'Nigeria', 'NO': 'Norway', 'OM': 'Oman', 'PK': 'Pakistan', 'PW': 'Palau',
+      'PA': 'Panama', 'PG': 'Papua New Guinea', 'PY': 'Paraguay', 'PE': 'Peru',
+      'PH': 'Philippines', 'PL': 'Poland', 'PT': 'Portugal', 'QA': 'Qatar', 'RO': 'Romania',
+      'RU': 'Russia', 'RW': 'Rwanda', 'KN': 'Saint Kitts and Nevis', 'LC': 'Saint Lucia',
+      'VC': 'Saint Vincent and the Grenadines', 'WS': 'Samoa', 'SM': 'San Marino',
+      'ST': 'Sao Tome and Principe', 'SA': 'Saudi Arabia', 'SN': 'Senegal', 'RS': 'Serbia',
+      'SC': 'Seychelles', 'SL': 'Sierra Leone', 'SG': 'Singapore', 'SK': 'Slovakia',
+      'SI': 'Slovenia', 'SB': 'Solomon Islands', 'SO': 'Somalia', 'ZA': 'South Africa',
+      'SS': 'South Sudan', 'ES': 'Spain', 'LK': 'Sri Lanka', 'SD': 'Sudan', 'SR': 'Suriname',
+      'SZ': 'Swaziland', 'SE': 'Sweden', 'CH': 'Switzerland', 'SY': 'Syria', 'TW': 'Taiwan',
+      'TJ': 'Tajikistan', 'TZ': 'Tanzania', 'TH': 'Thailand', 'TL': 'East Timor',
+      'TG': 'Togo', 'TO': 'Tonga', 'TT': 'Trinidad and Tobago', 'TN': 'Tunisia',
+      'TR': 'Turkey', 'TM': 'Turkmenistan', 'TV': 'Tuvalu', 'UG': 'Uganda', 'UA': 'Ukraine',
+      'AE': 'United Arab Emirates', 'GB': 'United Kingdom', 'US': 'United States',
+      'UY': 'Uruguay', 'UZ': 'Uzbekistan', 'VU': 'Vanuatu', 'VA': 'Vatican City',
+      'VE': 'Venezuela', 'VN': 'Vietnam', 'YE': 'Yemen', 'ZM': 'Zambia', 'ZW': 'Zimbabwe'
+    };
 
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    const COUNTRY_LIST = Object.entries(COUNTRY_CODES).map(([code, name]) => ({ code, name }));
 
-            const password = passwordInput.value;
-            errorMessage.textContent = '';
+    // ---------- HELPERS ----------
+    function formatNum(n) {
+      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+      if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+      return String(n);
+    }
 
-            try {
-                const response = await fetch('/api/admin/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ password })
-                });
+    function getSuccessRate(total, failed) {
+      if (!total) return 0;
+      return Math.round(((total - failed) / total) * 100);
+    }
 
-                const data = await response.json();
+    function getCountryName(code) {
+      return COUNTRY_CODES[code] || code;
+    }
 
-                if (response.ok && data.success) {
-                    window.location.href = '/admin';
-                } else {
-                    errorMessage.textContent = data.error || 'Login failed';
-                }
-            } catch (error) {
-                errorMessage.textContent = 'Connection error. Please try again.';
-            }
+    function extractValueFromExpression(expression) {
+      if (!expression) return '';
+      const match = expression.match(/"([^"]+)"/);
+      return match ? match[1] : expression;
+    }
+
+    // Check if all credentials are present
+    function isFullyAuthenticated() {
+      return state.cfToken && state.zoneId && state.serverId && state.zenuxsToken;
+    }
+
+    // ---------- DOMAIN MANAGEMENT ----------
+    async function fetchDomains() {
+      if (!state.cfToken || !state.zoneId) return;
+      try {
+        const response = await axios.post('/api/cloudflare/domains', {
+          token: state.cfToken,
+          zoneId: state.zoneId
         });
-    </script>
+        if (response.data.success) {
+          state.domains = response.data.domains || [];
+          render();
+        }
+      } catch (error) {
+        console.error('Error fetching domains:', error);
+      }
+    }
+
+    async function createDomain() {
+      if (!state.newDomain.name.trim()) {
+        alert('Please enter a domain name.');
+        return;
+      }
+
+      try {
+        const response = await axios.post('/api/cloudflare/domains/create', {
+          token: state.cfToken,
+          zoneId: state.zoneId,
+          type: state.newDomain.type,
+          name: state.newDomain.name,
+          content: state.newDomain.content || '192.168.1.1',
+          proxied: state.newDomain.proxied
+        });
+        if (response.data.success) {
+          state.domains.unshift(response.data.domain);
+          state.showDomainModal = false;
+          state.newDomain = { name: '', type: 'A', content: '', proxied: true };
+          render();
+        } else {
+          throw new Error(response.data.error || 'Failed to create domain');
+        }
+      } catch (error) {
+        console.error('Error creating domain:', error);
+        alert('Failed to create domain: ' + (error.response?.data?.error || error.message));
+      }
+    }
+
+    async function updateDomain() {
+      const id = state.editingDomain.id;
+      try {
+        const response = await axios.put(`/api/cloudflare/domains/update/${id}`, {
+          token: state.cfToken,
+          zoneId: state.zoneId,
+          type: state.newDomain.type,
+          name: state.newDomain.name,
+          content: state.newDomain.content,
+          proxied: state.newDomain.proxied
+        });
+        if (response.data.success) {
+          const index = state.domains.findIndex(d => d.id === id);
+          if (index !== -1) {
+            state.domains[index] = response.data.domain;
+          }
+          state.showDomainModal = false;
+          state.editingDomain = null;
+          render();
+        } else {
+          throw new Error(response.data.error || 'Failed to update domain');
+        }
+      } catch (error) {
+        console.error('Error updating domain:', error);
+        alert('Failed to update domain: ' + (error.response?.data?.error || error.message));
+      }
+    }
+
+    async function deleteDomain(id) {
+      if (!confirm('Are you sure you want to delete this domain?')) return;
+      try {
+        const response = await axios.delete(`/api/cloudflare/domains/delete/${id}`, {
+          data: {
+            token: state.cfToken,
+            zoneId: state.zoneId
+          }
+        });
+        if (response.data.success) {
+          state.domains = state.domains.filter(d => d.id !== id);
+          render();
+        } else {
+          throw new Error(response.data.error || 'Failed to delete domain');
+        }
+      } catch (error) {
+        console.error('Error deleting domain:', error);
+        alert('Failed to delete domain: ' + (error.response?.data?.error || error.message));
+      }
+    }
+
+    async function toggleProxy(id, currentProxied) {
+      try {
+        const response = await axios.patch(`/api/cloudflare/domains/toggle-proxy/${id}`, {
+          token: state.cfToken,
+          zoneId: state.zoneId,
+          proxied: !currentProxied
+        });
+        if (response.data.success) {
+          const index = state.domains.findIndex(d => d.id === id);
+          if (index !== -1) {
+            state.domains[index] = response.data.domain;
+            render();
+          }
+        } else {
+          throw new Error(response.data.error || 'Failed to toggle proxy');
+        }
+      } catch (error) {
+        console.error('Error toggling proxy:', error);
+        alert('Failed to toggle proxy: ' + (error.response?.data?.error || error.message));
+      }
+    }
+
+    // ---------- BLOCK RULES ----------
+    async function fetchBlockRules() {
+      if (!state.cfToken || !state.zoneId) return;
+      try {
+        const response = await axios.post('/api/cloudflare/blocks/list', {
+          token: state.cfToken,
+          zoneId: state.zoneId
+        });
+
+        console.log('Block rules response:', response.data);
+
+        if (response.data.success) {
+          const rules = response.data.rules || [];
+          const blockRules = rules.filter(rule =>
+            rule.action === 'block'
+          ).map(rule => {
+            let type = 'ip';
+            let value = '';
+            const expr = rule.expression || '';
+
+            if (expr.includes('ip.src.country')) {
+              type = 'country';
+              const match = expr.match(/ip\.src\.country\s+eq\s+"([^"]+)"/);
+              value = match ? match[1] : '';
+            } else if (expr.includes('ip.src.ip')) {
+              type = 'ip';
+              const match = expr.match(/ip\.src\.ip\s+eq\s+"([^"]+)"/);
+              value = match ? match[1] : '';
+            } else if (expr.includes('ip.src.asnum')) {
+              type = 'isp';
+              const match = expr.match(/ip\.src\.asnum\s+eq\s+"([^"]+)"/);
+              value = match ? match[1] : '';
+            } else {
+              const match = expr.match(/"([^"]+)"/);
+              value = match ? match[1] : expr;
+            }
+
+            return {
+              _id: rule.id,
+              type: type,
+              value: value || 'Unknown',
+              reason: rule.description || 'Blocked by Cloudflare',
+              enabled: rule.enabled !== false,
+              expression: rule.expression,
+              action: rule.action
+            };
+          });
+
+          state.blockRules = blockRules;
+          render();
+        } else {
+          console.error('Failed to fetch block rules:', response.data.error);
+          state.blockRules = [];
+          render();
+        }
+      } catch (error) {
+        console.error('Error fetching block rules:', error);
+        state.blockRules = [];
+        render();
+      }
+    }
+
+    async function addBlockRule() {
+      if (!state.newRule.value.trim()) {
+        alert('Please enter a value for the block rule.');
+        return;
+      }
+
+      try {
+        const response = await axios.post('/api/cloudflare/blocks/add', {
+          token: state.cfToken,
+          zoneId: state.zoneId,
+          type: state.newRule.type,
+          value: state.newRule.value,
+          reason: state.newRule.reason
+        });
+
+        if (response.data.success) {
+          state.blockRules.unshift(response.data.rule);
+          state.showModal = false;
+          state.newRule = { type: 'country', value: '', reason: '' };
+          render();
+        } else {
+          throw new Error(response.data.error || 'Failed to add block rule');
+        }
+      } catch (error) {
+        console.error('Failed to add block rule:', error);
+        alert('Failed to add block rule: ' + (error.response?.data?.error || error.message));
+      }
+    }
+
+    async function removeBlockRule(ruleId) {
+      if (!confirm('Remove this block rule?')) return;
+      try {
+        const response = await axios.post('/api/cloudflare/blocks/remove', {
+          token: state.cfToken,
+          zoneId: state.zoneId,
+          ruleId: ruleId
+        });
+        if (response.data.success) {
+          state.blockRules = state.blockRules.filter(r => r._id !== ruleId);
+          render();
+        } else {
+          throw new Error(response.data.error || 'Failed to remove block rule');
+        }
+      } catch (error) {
+        console.error('Error removing block rule:', error);
+        alert('Failed to remove block rule: ' + (error.response?.data?.error || error.message));
+      }
+    }
+
+    async function toggleBlockRule(ruleId, currentEnabled) {
+      try {
+        const response = await axios.patch(`/api/cloudflare/blocks/toggle/${ruleId}`, {
+          token: state.cfToken,
+          zoneId: state.zoneId,
+          enabled: !currentEnabled
+        });
+        if (response.data.success) {
+          const rule = state.blockRules.find(r => r._id === ruleId);
+          if (rule) {
+            rule.enabled = !currentEnabled;
+            render();
+          }
+        } else {
+          throw new Error(response.data.error || 'Failed to toggle rule');
+        }
+      } catch (error) {
+        console.error('Error toggling rule:', error);
+        alert('Failed to toggle rule: ' + (error.response?.data?.error || error.message));
+      }
+    }
+
+    // ---------- ANALYTICS (using Zenuxs token) ----------
+    async function fetchAnalytics() {
+      if (!state.zenuxsToken || !state.serverId) {
+        state.loading = false;
+        render();
+        return;
+      }
+
+      state.loading = true;
+      render();
+
+      try {
+        const response = await axios.post('/analytics/stats', {
+          token: state.zenuxsToken,
+          serverId: state.serverId,
+          timeRange: state.timeRange
+        });
+
+        console.log('Analytics response:', response.data);
+
+        if (response.data.success && response.data.data) {
+          state.stats = response.data.data;
+        } else {
+          // Fallback mock data if API fails
+          state.stats = generateMockStats();
+        }
+        state.loading = false;
+        render();
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+        // Use mock data as fallback
+        state.stats = generateMockStats();
+        state.loading = false;
+        render();
+      }
+    }
+
+    function generateMockStats() {
+      return {
+        totalRequests: Math.floor(Math.random() * 200000) + 50000,
+        failedRequests: Math.floor(Math.random() * 5000) + 500,
+        liveUsers: Math.floor(Math.random() * 100) + 10,
+        uniqueVisitors: Math.floor(Math.random() * 10000) + 2000,
+        avgResponseTime: Math.floor(Math.random() * 300) + 50,
+        previousTotal: Math.floor(Math.random() * 150000) + 30000,
+        previousUniqueVisitors: Math.floor(Math.random() * 8000) + 1000,
+        previousFailedRequests: Math.floor(Math.random() * 4000) + 200,
+        routeStats: [
+          { path: '/', total: 50000, success: 49000, failed: 1000, avgResponseTime: 120,
+            methods: ['GET'], uniqueIPs: 500 },
+          { path: '/api/users', total: 35000, success: 34000, failed: 1000, avgResponseTime: 180,
+            methods: ['GET', 'POST'], uniqueIPs: 300 },
+          { path: '/api/auth', total: 25000, success: 24000, failed: 1000, avgResponseTime: 90,
+            methods: ['POST'], uniqueIPs: 200 }
+        ],
+        requestsOverTime: generateTimeSeriesData(),
+        recentRequests: generateRecentRequests(),
+        countryStats: [
+          { country: 'United States', count: 45000 },
+          { country: 'Germany', count: 32000 },
+          { country: 'United Kingdom', count: 18000 },
+          { country: 'France', count: 12000 },
+          { country: 'Canada', count: 8000 },
+          { country: 'Australia', count: 6000 }
+        ],
+        ddosDetection: {
+          isUnderAttack: false,
+          suspiciousIPs: [
+            { ip: '192.168.1.100', requests: 450 },
+            { ip: '10.0.0.50', requests: 320 }
+          ],
+          requestsPerMinute: 450
+        }
+      };
+    }
+
+    function generateTimeSeriesData() {
+      const data = [];
+      const now = Date.now();
+      for (let i = 0; i < 24; i++) {
+        data.push({
+          _id: new Date(now - (23 - i) * 3600000).toISOString(),
+          count: Math.floor(Math.random() * 100) + 20,
+          failed: Math.floor(Math.random() * 10)
+        });
+      }
+      return data;
+    }
+
+    function generateRecentRequests() {
+      const methods = ['GET', 'POST', 'PUT', 'DELETE'];
+      const paths = ['/api/users', '/api/products', '/api/auth', '/', '/api/orders'];
+      const countries = ['US', 'DE', 'GB', 'FR', 'CA', 'AU', 'JP', 'CN'];
+      const statuses = [200, 200, 200, 201, 200, 404, 200, 200, 500];
+
+      return Array.from({ length: 10 }, () => ({
+        timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+        ip: `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+        country: countries[Math.floor(Math.random() * countries.length)],
+        method: methods[Math.floor(Math.random() * methods.length)],
+        path: paths[Math.floor(Math.random() * paths.length)],
+        statusCode: statuses[Math.floor(Math.random() * statuses.length)],
+        responseTime: Math.floor(Math.random() * 400) + 50
+      }));
+    }
+
+    // ---------- MODAL FUNCTIONS ----------
+    function openModal() {
+      state.showModal = true;
+      state.newRule = { type: 'country', value: '', reason: '' };
+      renderModal();
+    }
+
+    function openModalWithIP(ip) {
+      state.showModal = true;
+      state.newRule = { type: 'ip', value: ip, reason: 'Suspicious activity detected' };
+      renderModal();
+    }
+
+    function closeModal() {
+      state.showModal = false;
+      render();
+    }
+
+    function updateRuleType(val) {
+      state.newRule.type = val;
+      state.newRule.value = '';
+      renderModal();
+    }
+
+    function updateRuleValue(val) {
+      state.newRule.value = val;
+    }
+
+    function updateRuleReason(val) {
+      state.newRule.reason = val;
+    }
+
+    function renderModal() {
+      const existing = document.getElementById('modal-overlay');
+      if (existing) existing.remove();
+
+      if (!state.showModal) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-backdrop';
+      overlay.id = 'modal-overlay';
+      overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+
+      const rule = state.newRule;
+      const isCountry = rule.type === 'country';
+
+      overlay.innerHTML = `
+                <div class="modal-box">
+                    <h3><i class="fas fa-ban"></i> Add Block Rule</h3>
+                    <label>Block Type</label>
+                    <select id="modalRuleType" onchange="updateRuleType(this.value)">
+                        <option value="country" ${rule.type==='country'?'selected':''}>Country</option>
+                        <option value="ip" ${rule.type==='ip'?'selected':''}>IP Address</option>
+                        <option value="isp" ${rule.type==='isp'?'selected':''}>ISP (ASN)</option>
+                        <option value="region" ${rule.type==='region'?'selected':''}>Region</option>
+                    </select>
+                    <label>Value</label>
+                    ${isCountry ? 
+                        `<select id="modalRuleValue" onchange="updateRuleValue(this.value)">
+                            <option value="">Select a country</option>
+                            ${COUNTRY_LIST.map(c => `<option value="${c.code}" ${rule.value===c.code?'selected':''}>${c.code} - ${c.name}</option>`).join('')}
+                        </select>` :
+                        `<input id="modalRuleValue" type="text" placeholder="${rule.type==='ip'?'192.168.1.1': rule.type==='isp'?'ASN (e.g., 12345)':'Region Name'}" value="${rule.value}" oninput="updateRuleValue(this.value)" />`
+                    }
+                    ${rule.type === 'isp' ? `<small style="color:#7e8bb0;display:block;margin-top:4px;">Enter ASN number (e.g., 12345 for Comcast)</small>` : ''}
+                    <label>Reason (Optional)</label>
+                    <textarea id="modalRuleReason" rows="3" placeholder="Why are you blocking this?" oninput="updateRuleReason(this.value)">${rule.reason}</textarea>
+                    <div class="modal-actions">
+                        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button class="btn-danger" onclick="addBlockRule()"><i class="fas fa-ban"></i> Block</button>
+                    </div>
+                </div>
+            `;
+
+      document.body.appendChild(overlay);
+    }
+
+    // ---------- DOMAIN MODAL ----------
+    function openDomainModal(domain = null) {
+      state.showDomainModal = true;
+      state.editingDomain = domain;
+      if (domain) {
+        state.newDomain = {
+          name: domain.name,
+          type: domain.type,
+          content: domain.content,
+          proxied: domain.proxied
+        };
+      } else {
+        state.newDomain = { name: '', type: 'A', content: '', proxied: true };
+      }
+      renderDomainModal();
+    }
+
+    function closeDomainModal() {
+      state.showDomainModal = false;
+      state.editingDomain = null;
+      render();
+    }
+
+    function renderDomainModal() {
+      const existing = document.getElementById('domain-modal-overlay');
+      if (existing) existing.remove();
+
+      if (!state.showDomainModal) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-backdrop';
+      overlay.id = 'domain-modal-overlay';
+      overlay.onclick = (e) => { if (e.target === overlay) closeDomainModal(); };
+
+      const isEdit = !!state.editingDomain;
+      const domain = state.newDomain;
+
+      overlay.innerHTML = `
+                <div class="modal-box">
+                    <h3><i class="fas fa-globe"></i> ${isEdit ? 'Edit' : 'Add'} Domain</h3>
+                    <div class="domain-form">
+                        <div class="domain-form-row">
+                            <div class="full-width">
+                                <label>Domain Name</label>
+                                <input type="text" value="${domain.name}" 
+                                       placeholder="example.com" 
+                                       oninput="updateDomainField('name', this.value)" 
+                                       ${isEdit ? 'readonly' : ''} />
+                            </div>
+                            <div>
+                                <label>Record Type</label>
+                                <select onchange="updateDomainField('type', this.value)">
+                                    <option value="A" ${domain.type==='A'?'selected':''}>A</option>
+                                    <option value="CNAME" ${domain.type==='CNAME'?'selected':''}>CNAME</option>
+                                    <option value="AAAA" ${domain.type==='AAAA'?'selected':''}>AAAA</option>
+                                    <option value="MX" ${domain.type==='MX'?'selected':''}>MX</option>
+                                    <option value="TXT" ${domain.type==='TXT'?'selected':''}>TXT</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Content / IP Address</label>
+                                <input type="text" value="${domain.content}" 
+                                       placeholder="192.168.1.1" 
+                                       oninput="updateDomainField('content', this.value)" />
+                            </div>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="proxied" ${domain.proxied ? 'checked' : ''} 
+                                   onchange="updateDomainField('proxied', this.checked)" />
+                            <label for="proxied">Enable Cloudflare Proxy (Orange Cloud)</label>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-secondary" onclick="closeDomainModal()">Cancel</button>
+                            <button class="btn-primary" onclick="createOrUpdateDomain()">
+                                <i class="fas ${isEdit ? 'fa-save' : 'fa-plus'}"></i> 
+                                ${isEdit ? 'Update' : 'Create'} Domain
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+      document.body.appendChild(overlay);
+    }
+
+    function updateDomainField(field, value) {
+      state.newDomain[field] = value;
+    }
+
+    function createOrUpdateDomain() {
+      if (state.editingDomain) {
+        updateDomain();
+      } else {
+        createDomain();
+      }
+    }
+
+    function quickAddDomain() {
+      const name = document.getElementById('quickDomainName')?.value?.trim();
+      const content = document.getElementById('quickDomainIP')?.value?.trim();
+      if (!name || !content) {
+        alert('Please enter both domain name and IP address.');
+        return;
+      }
+
+      state.newDomain = { name, type: 'A', content, proxied: true };
+      createDomain();
+    }
+
+    // ---------- TAB MANAGEMENT ----------
+    function switchTab(tab) {
+      state.activeTab = tab;
+      render();
+    }
+
+    // ---------- AUTH ----------
+    function authenticate() {
+      const cfToken = document.getElementById('cfTokenInput').value.trim();
+      const zoneId = document.getElementById('zoneIdInput').value.trim();
+      const serverId = document.getElementById('serverIdInput').value.trim();
+      const zenuxsToken = document.getElementById('zenuxsTokenInput').value.trim();
+
+      if (!cfToken || !zoneId || !serverId || !zenuxsToken) {
+        state.authError = true;
+        state.authSuccess = false;
+        render();
+        return;
+      }
+
+      state.cfToken = cfToken;
+      state.zoneId = zoneId;
+      state.serverId = serverId;
+      state.zenuxsToken = zenuxsToken;
+
+      localStorage.setItem('cfToken', cfToken);
+      localStorage.setItem('zoneId', zoneId);
+      localStorage.setItem('serverId', serverId);
+      localStorage.setItem('zenuxsToken', zenuxsToken);
+
+      state.authError = false;
+      state.authSuccess = true;
+      state.isAuthenticated = true;
+
+      render();
+
+      // Load all data
+      Promise.all([
+        fetchBlockRules(),
+        fetchDomains(),
+        fetchAnalytics()
+      ]).then(() => {
+        render();
+      });
+
+      // Set up auto-refresh for analytics
+      if (state.analyticsInterval) {
+        clearInterval(state.analyticsInterval);
+      }
+      state.analyticsInterval = setInterval(fetchAnalytics, 30000);
+    }
+
+    function logout() {
+      localStorage.removeItem('cfToken');
+      localStorage.removeItem('zoneId');
+      localStorage.removeItem('serverId');
+      localStorage.removeItem('zenuxsToken');
+      state.cfToken = '';
+      state.zoneId = '';
+      state.serverId = '';
+      state.zenuxsToken = '';
+      state.isAuthenticated = false;
+      state.stats = null;
+      state.domains = [];
+      state.blockRules = [];
+      if (state.analyticsInterval) {
+        clearInterval(state.analyticsInterval);
+        state.analyticsInterval = null;
+      }
+      render();
+    }
+
+    // ---------- RENDER ----------
+    function render() {
+      const app = document.getElementById('app');
+
+      // Show auth screen if not authenticated
+      if (!state.cfToken || !state.zoneId || !state.serverId || !state.zenuxsToken) {
+        app.innerHTML = authScreen();
+        return;
+      }
+
+      const s = state.stats || {};
+      const total = s.totalRequests || 0;
+      const failed = s.failedRequests || 0;
+      const successRate = getSuccessRate(total, failed);
+      const live = s.liveUsers || 0;
+      const unique = s.uniqueVisitors || 0;
+      const avgResp = s.avgResponseTime || 0;
+      const routeStats = s.routeStats || [];
+      const requestsOverTime = s.requestsOverTime || [];
+      const recentRequests = s.recentRequests || [];
+      const countryStats = s.countryStats || [];
+      const ddos = s.ddosDetection || {};
+      const suspicious = ddos.suspiciousIPs || [];
+      const isUnderAttack = ddos.isUnderAttack || false;
+      const blockRules = state.blockRules || [];
+      const domains = state.domains || [];
+
+      let html = `
+                <div class="main-header">
+                    <div class="brand">
+                        <i class="fas fa-shield-halved"></i>
+                        <h1>Zenuxs <span>${state.zoneId.substring(0, 8)}...</span></h1>
+                    </div>
+                    <div class="header-actions">
+                        <div class="server-badge"><i class="fas fa-server"></i> Server: ${state.serverId.substring(0, 12)}...</div>
+                        <button class="btn-outline" onclick="window.location.reload()"><i class="fas fa-sync"></i> Refresh</button>
+                        <button class="btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Block Rule</button>
+                        <button class="btn-outline" onclick="logout()" style="border-color:#f87171;color:#f87171;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            `;
+
+      // Tab Navigation
+      html += `
+                <div class="tab-nav">
+                    <button class="${state.activeTab === 'analytics' ? 'active' : ''}" onclick="switchTab('analytics')">
+                        <i class="fas fa-chart-line"></i> Analytics
+                    </button>
+                    <button class="${state.activeTab === 'domains' ? 'active' : ''}" onclick="switchTab('domains')">
+                        <i class="fas fa-globe"></i> Domains
+                    </button>
+                    <button class="${state.activeTab === 'security' ? 'active' : ''}" onclick="switchTab('security')">
+                        <i class="fas fa-shield"></i> Security
+                    </button>
+                </div>
+            `;
+
+      // ============ ANALYTICS TAB ============
+      html += `<div class="tab-content ${state.activeTab === 'analytics' ? 'active' : ''}">`;
+
+      if (isUnderAttack) {
+        html += `<div style="background:#3a1a1a;padding:12px 20px;border-radius:40px;border:1px solid #f87171;margin-bottom:24px;display:flex;align-items:center;gap:12px;">
+                    <i class="fas fa-triangle-exclamation" style="color:#f87171;"></i> 
+                    DDoS Attack Detected! ${ddos.requestsPerMinute || 0} req/min · ${ddos.recommendation || 'Take action immediately'}
+                </div>`;
+      }
+
+      // Stats cards
+      html += `<div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title"><i class="fas fa-globe"></i> Total Requests</div>
+                    <div class="stat-number">${formatNum(total)}</div>
+                    <div class="stat-sub"><i class="fas fa-arrow-up success"></i> ${formatNum(total - (s.previousTotal || 0))} vs prev</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title"><i class="fas fa-users"></i> Unique Visitors</div>
+                    <div class="stat-number">${formatNum(unique)}</div>
+                    <div class="stat-sub"><i class="fas fa-arrow-up success"></i> ${formatNum(unique - (s.previousUniqueVisitors || 0))} vs prev</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title"><i class="fas fa-check-circle" style="color:#4ade80;"></i> Success Rate</div>
+                    <div class="stat-number">${successRate}%</div>
+                    <div class="stat-sub"><i class="fas fa-check success"></i> ${formatNum(total - failed)} successful</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title"><i class="fas fa-times-circle" style="color:#f87171;"></i> Failed Requests</div>
+                    <div class="stat-number">${formatNum(failed)}</div>
+                    <div class="stat-sub"><i class="fas fa-arrow-up danger"></i> ${formatNum(failed - (s.previousFailedRequests || 0))} vs prev</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title"><i class="fas fa-clock"></i> Avg Response</div>
+                    <div class="stat-number">${avgResp}ms</div>
+                    <div class="stat-sub">${avgResp < 100 ? '🟢 Fast' : avgResp < 500 ? '🟡 Moderate' : '🔴 Slow'}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title"><i class="fas fa-users"></i> Live Users</div>
+                    <div class="stat-number"><span class="live-dot"></span>${live}</div>
+                    <div class="stat-sub">Active in last 60s</div>
+                </div>
+            </div>`;
+
+      // Route stats
+      html += `<div class="section"><div class="section-header"><h3><i class="fas fa-route"></i> Route Statistics</h3></div>`;
+      if (routeStats.length) {
+        html += `<div class="route-grid">`;
+        routeStats.forEach(r => {
+          const succRate = r.total > 0 ? Math.round((r.success / r.total) * 100) : 0;
+          html += `<div class="route-card">
+                        <div class="route-path">${r.path}</div>
+                        <div class="route-metrics">
+                            <span><i class="fas fa-arrow-up"></i> ${formatNum(r.total)}</span>
+                            <span><i class="fas fa-check" style="color:#4ade80;"></i> ${formatNum(r.success)}</span>
+                            <span><i class="fas fa-times" style="color:#f87171;"></i> ${formatNum(r.failed)}</span>
+                        </div>
+                        <div class="progress"><div class="fill" style="width:${succRate}%;"></div></div>
+                        <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#7e8bb0;">
+                            <span>${r.avgResponseTime}ms</span>
+                            <span>${succRate}% success</span>
+                        </div>
+                        <div class="method-tags">${(r.methods||[]).map(m => `<span class="method-tag ${m.toLowerCase()}">${m}</span>`).join('')}</div>
+                        <div class="text-muted mt-2"><i class="fas fa-network-wired"></i> ${r.uniqueIPs || 0} unique IPs</div>
+                    </div>`;
+        });
+        html += `</div>`;
+      } else {
+        html += `<div class="empty-state"><i class="fas fa-chart-simple"></i><p>No route data available</p></div>`;
+      }
+      html += `</div>`;
+
+      // Traffic over time
+      html += `<div class="section"><div class="section-header"><h3><i class="fas fa-chart-line"></i> Traffic Over Time</h3></div>`;
+      if (requestsOverTime.length) {
+        const max = Math.max(...requestsOverTime.map(p => p.count || 0));
+        html += `<div class="traffic-bars">`;
+        requestsOverTime.slice(-18).forEach(p => {
+          const h = max > 0 ? (p.count / max) * 100 : 0;
+          const failedClass = (p.failed || 0) > 0 ? 'failed' : '';
+          html += `<div class="bar-wrapper">
+                        <div class="bar ${failedClass}" style="height:${Math.max(h, 4)}%;"></div>
+                        <div class="bar-label">${new Date(p._id).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+                    </div>`;
+        });
+        html += `</div>`;
+      } else {
+        html += `<div class="empty-state"><i class="fas fa-chart-bar"></i><p>No traffic data available</p></div>`;
+      }
+      html += `</div>`;
+
+      // Recent requests
+      html += `<div class="section"><div class="section-header"><h3><i class="fas fa-clock-rotate-left"></i> Recent Requests</h3></div><div class="table-wrap"><table><thead><tr><th>Time</th><th>IP</th><th>Country</th><th>Method</th><th>Path</th><th>Status</th><th>Response</th></tr></thead><tbody>`;
+      if (recentRequests.length) {
+        recentRequests.slice(0, 15).forEach(r => {
+          const statusClass = `status-${Math.floor((r.statusCode || 200)/100)}`;
+          html += `<tr>
+                        <td>${new Date(r.timestamp).toLocaleTimeString()}</td>
+                        <td><a href="#" class="ip-link">${r.ip || '-'}</a></td>
+                        <td>${r.country || '-'}</td>
+                        <td><span class="method-badge ${(r.method||'get').toLowerCase()}">${r.method || 'GET'}</span></td>
+                        <td>${r.path || '/'}</td>
+                        <td><span class="status-badge ${statusClass}">${r.statusCode || 200}</span></td>
+                        <td>${r.responseTime || 0}ms</td>
+                    </tr>`;
+        });
+      } else {
+        html += `<tr><td colspan="7" class="empty-state">No recent requests</td></tr>`;
+      }
+      html += `</tbody></table></div></div>`;
+
+      // Country stats
+      html += `<div class="section"><div class="section-header"><h3><i class="fas fa-globe"></i> Top Countries</h3></div>`;
+      if (countryStats.length) {
+        const maxCount = countryStats[0]?.count || 1;
+        countryStats.slice(0, 8).forEach((c, i) => {
+          const pct = Math.min((c.count / maxCount) * 100, 100);
+          html += `<div class="country-item">
+                        <span class="country-name">${i+1}. ${c.country}</span>
+                        <div class="country-bar-bg"><div class="country-bar-fill" style="width:${pct}%;"></div></div>
+                        <span class="country-count">${formatNum(c.count)}</span>
+                    </div>`;
+        });
+      } else {
+        html += `<div class="empty-state"><i class="fas fa-globe"></i><p>No country data available</p></div>`;
+      }
+      html += `</div>`;
+
+      html += `</div>`;
+
+      // ============ DOMAINS TAB ============
+      html += `<div class="tab-content ${state.activeTab === 'domains' ? 'active' : ''}">`;
+      html += `<div class="section"><div class="section-header"><h3><i class="fas fa-globe"></i> Domain Management <span class="badge">${domains.length}</span></h3>
+                <button class="btn-primary" onclick="openDomainModal()"><i class="fas fa-plus"></i> Add Domain</button>
+            </div>`;
+
+      html += `<div style="margin-bottom:16px;">
+                <div class="quick-add-row">
+                    <input type="text" id="quickDomainName" placeholder="example.com" />
+                    <input type="text" id="quickDomainIP" placeholder="IP Address" />
+                    <button onclick="quickAddDomain()"><i class="fas fa-plus"></i> Quick Add</button>
+                </div>
+            </div>`;
+
+      if (domains.length) {
+        html += `<div class="domains-grid">`;
+        domains.forEach(domain => {
+          const statusText = domain.proxied ? 'Protected' : 'Unprotected';
+          const statusClass = domain.proxied ? 'protected' : 'unprotected';
+          const icon = domain.proxied ? '🟢' : '🔴';
+
+          html += `<div class="domain-card">
+                        <div class="domain-info">
+                            <div class="domain-name">${domain.name}</div>
+                            <div class="domain-details">
+                                <span><i class="fas fa-tag"></i> ${domain.type}</span>
+                                <span><i class="fas fa-ip"></i> ${domain.content}</span>
+                                <span><i class="fas fa-clock"></i> ${domain.ttl || 120}s TTL</span>
+                            </div>
+                        </div>
+                        <div class="domain-actions">
+                            <span class="domain-status ${statusClass}">${icon} ${statusText}</span>
+                            <button onclick="toggleProxy('${domain.id}', ${domain.proxied})" title="Toggle Cloudflare Proxy">
+                                <i class="fas fa-cloud ${domain.proxied ? 'fa-solid' : 'fa-regular'}"></i>
+                            </button>
+                            <button onclick="openDomainModal(${JSON.stringify(domain).replace(/"/g, '&quot;')})" title="Edit Domain">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-danger" onclick="deleteDomain('${domain.id}')" title="Delete Domain">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>`;
+        });
+        html += `</div>`;
+      } else {
+        html += `<div class="empty-state"><i class="fas fa-globe"></i><p>No domains configured. Add your first domain above.</p></div>`;
+      }
+
+      html += `</div>`;
+      html += `</div>`;
+
+      // ============ SECURITY TAB ============
+      html += `<div class="tab-content ${state.activeTab === 'security' ? 'active' : ''}">`;
+      html += `<div class="section"><div class="section-header"><h3><i class="fas fa-shield"></i> Block Rules <span class="badge">${blockRules.length}</span></h3>
+                <button class="btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Add Block Rule</button>
+            </div>`;
+
+      html += `<div class="rules-grid">`;
+      if (blockRules.length) {
+        blockRules.forEach(r => {
+          const iconMap = { ip: 'fa-network-wired', country: 'fa-globe-americas', isp: 'fa-server',
+            region: 'fa-map-pin' };
+          const icon = iconMap[r.type] || 'fa-ban';
+          const statusText = r.enabled !== false ? 'Active' : 'Disabled';
+          const statusColor = r.enabled !== false ? '#4ade80' : '#f87171';
+
+          html += `<div class="rule-card">
+                        <div class="rule-info">
+                            <div class="rule-type"><i class="fas ${icon}"></i> ${r.type.toUpperCase()}</div>
+                            <div class="rule-value">${r.value}</div>
+                            ${r.reason ? `<div class="rule-reason">${r.reason}</div>` : ''}
+                            <div class="rule-status ${r.enabled !== false ? 'active' : 'inactive'}">
+                                <i class="fas ${r.enabled !== false ? 'fa-check-circle' : 'fa-circle'}"></i> ${statusText}
+                            </div>
+                        </div>
+                        <div class="rule-actions">
+                            <button onclick="toggleBlockRule('${r._id}', ${r.enabled !== false})" title="Toggle rule">
+                                <i class="fas ${r.enabled !== false ? 'fa-pause' : 'fa-play'}"></i>
+                            </button>
+                            <button onclick="removeBlockRule('${r._id}')" title="Delete rule">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>`;
+        });
+      } else {
+        html += `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-shield"></i><p>No block rules configured. Add rules to protect your server.</p></div>`;
+      }
+      html += `</div></div>`;
+
+      // Suspicious IPs
+      if (suspicious && suspicious.length > 0) {
+        html += `<div class="section"><div class="section-header"><h3><i class="fas fa-triangle-exclamation"></i> Suspicious IPs</h3></div><div style="display:flex;flex-wrap:wrap;gap:14px;">`;
+        suspicious.slice(0, 6).forEach(ip => {
+          html += `<div class="suspicious-ip-item">
+                        <span><i class="fas fa-ip"></i> ${ip.ip}</span>
+                        <span class="text-muted">${ip.requests} req/5min</span>
+                        <button class="btn-outline" onclick="openModalWithIP('${ip.ip}')"><i class="fas fa-ban"></i> Block</button>
+                    </div>`;
+        });
+        html += `</div></div>`;
+      }
+
+      html += `</div>`;
+
+      app.innerHTML = html;
+    }
+
+    // ---------- AUTH SCREEN ----------
+    function authScreen() {
+      const errorMsg = state.authError ? `<div class="error-msg"><i class="fas fa-circle-exclamation"></i> Please fill in all fields</div>` : '';
+      const successMsg = state.authSuccess ? `<div class="success-msg"><i class="fas fa-check-circle"></i> Connected successfully!</div>` : '';
+
+      return `
+                <div class="auth-overlay">
+                    <div class="auth-card">
+                        <h2><i class="fas fa-shield-halved"></i> Zenuxs</h2>
+                        <p>Enter your credentials to manage Cloudflare security and DNS.</p>
+                        
+                        <hr class="auth-divider" />
+                        <div class="auth-section-title">Cloudflare Credentials</div>
+                        
+                        <label>Cloudflare API Token <span class="required">*</span></label>
+                        <input id="cfTokenInput" type="password" placeholder="Enter your Cloudflare API token" />
+                        
+                        <label>Zone ID <span class="required">*</span></label>
+                        <input id="zoneIdInput" type="text" placeholder="Enter your Cloudflare Zone ID" />
+                        
+                        <hr class="auth-divider" />
+                        <div class="auth-section-title">Zenuxs Credentials</div>
+                        
+                        <label>Server ID <span class="required">*</span></label>
+                        <input id="serverIdInput" type="text" placeholder="Enter your Zenuxs Server ID" />
+                        <div class="help-text">The server ID from your Zenuxs dashboard</div>
+                        
+                        <label>Zenuxs API Token <span class="required">*</span></label>
+                        <input id="zenuxsTokenInput" type="password" placeholder="Enter your Zenuxs API token" />
+                        <div class="help-text">Used for analytics and server management</div>
+                        
+                        ${errorMsg}
+                        ${successMsg}
+                        
+                        <button class="btn-primary" onclick="authenticate()">
+                            <i class="fas fa-arrow-right-to-bracket"></i> Connect to Zenuxs
+                        </button>
+                    </div>
+                </div>
+            `;
+    }
+
+    // ---------- EXPOSE TO WINDOW ----------
+    window.openModal = openModal;
+    window.openModalWithIP = openModalWithIP;
+    window.closeModal = closeModal;
+    window.updateRuleType = updateRuleType;
+    window.updateRuleValue = updateRuleValue;
+    window.updateRuleReason = updateRuleReason;
+    window.addBlockRule = addBlockRule;
+    window.removeBlockRule = removeBlockRule;
+    window.toggleBlockRule = toggleBlockRule;
+    window.authenticate = authenticate;
+    window.logout = logout;
+    window.render = render;
+    window.switchTab = switchTab;
+    window.openDomainModal = openDomainModal;
+    window.closeDomainModal = closeDomainModal;
+    window.createOrUpdateDomain = createOrUpdateDomain;
+    window.deleteDomain = deleteDomain;
+    window.toggleProxy = toggleProxy;
+    window.updateDomainField = updateDomainField;
+    window.quickAddDomain = quickAddDomain;
+    window.fetchAnalytics = fetchAnalytics;
+    window.fetchBlockRules = fetchBlockRules;
+    window.fetchDomains = fetchDomains;
+
+    // ---------- BOOTSTRAP ----------
+    // Check if all credentials are present on load
+    if (state.cfToken && state.zoneId && state.serverId && state.zenuxsToken) {
+      state.isAuthenticated = true;
+      render();
+      Promise.all([
+        fetchBlockRules(),
+        fetchDomains(),
+        fetchAnalytics()
+      ]).then(() => render());
+
+      // Set up auto-refresh
+      state.analyticsInterval = setInterval(fetchAnalytics, 30000);
+    } else {
+      render();
+    }
+  </script>
 </body>
+
 </html>
